@@ -1,0 +1,11 @@
+REPOSITORY/obj/
+Module/obj/
+REPOSITORY/bin/
+Module/bin/
+MODEL/obj/
+MODEL/bin/
+INTERFACE/obj/
+DATA/obj/
+DATA.EF/obj/
+DATA.EF/bin/
+DATA/bin/
