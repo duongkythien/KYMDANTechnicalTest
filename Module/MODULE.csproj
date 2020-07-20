@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MODEL\MODEL.csproj" />
     <ProjectReference Include="..\REPOSITORY\REPOSITORY.csproj" />
   </ItemGroup>
 

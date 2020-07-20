@@ -1,4 +1,6 @@
 ﻿using DATA;
+using Microsoft.EntityFrameworkCore;
+using MODEL;
 using REPOSITORY;
 using System;
 using System.Collections.Generic;
@@ -10,16 +12,9 @@ namespace MODULE
     public class TodoListService : ITodoListService
     {
         private IRepository<TodoList> _todoRepo;
-        private ICategoryService _categoryService;
-        public TodoListService(IRepository<TodoList> todoRepo, ICategoryService categoryService)
+        public TodoListService(IRepository<TodoList> todoRepo)
         {
             _todoRepo = todoRepo;
-            _categoryService = categoryService;
-        }
-
-        public List<TodoList> GetCategories()
-        {
-            return _todoRepo.GetAll().ToList();
         }
 
         public TodoList GetTodoItemById(long id)
@@ -27,25 +22,46 @@ namespace MODULE
             return _todoRepo.Get(id);
         }
 
-        public TodoList Insert(TodoList todoItem)
+        public TodoList Insert(TodoListDTO todoItem)
         {
-            return _todoRepo.Insert(todoItem);
+            TodoList todoListItem = new TodoList
+            {
+                Name = todoItem.Name,
+                CategoryId = todoItem.CategoryId,
+                Description = todoItem.Description,
+                DueDate = todoItem.DueDate,
+                Status = (byte)todoItem.Status
+            };
+            return _todoRepo.Insert(todoListItem);
         }
 
-        public List<TodoList> Search(string description, string category_name, int? status, int? limit = 10, int? offset = 1)
+        public TodoList Update(long id, TodoListDTO todoItem)
         {
-            IQueryable<TodoList> todoList = _todoRepo.GetAll();
-            if(!string.IsNullOrEmpty(description) && !string.IsNullOrWhiteSpace(description)) todoList = todoList.Where(s => s.Description.Contains(description));
+            TodoList todoListItem = new TodoList
+            {
+                Id = id,
+                Name = todoItem.Name,
+                CategoryId = todoItem.CategoryId,
+                Description = todoItem.Description,
+                DueDate = todoItem.DueDate,
+                Status = (byte)todoItem.Status
+            };
+            return _todoRepo.Update(todoListItem);
+        }
+
+        public List<TodoList> Search(string description, string category_name, int? status, int limit, int offset)
+        {
+            IQueryable<TodoList> todoList = _todoRepo.GetAll().Include(s=>s.Category);
+            if(!string.IsNullOrEmpty(description) && !string.IsNullOrWhiteSpace(description)) 
+                todoList = todoList.Where(s => s.Description.Contains(description));
 
             if(!string.IsNullOrEmpty(category_name) && !string.IsNullOrWhiteSpace(category_name))
-            {
-                Category category = _categoryService.FindCategoryBy(category_name);
-                if(category != null)
-                    todoList = todoList.Where(s => s.CategoryId == category.Id);
-            }
+                todoList = todoList.Where(s => s.Category.Name == category_name);
 
-            if(status.HasValue) todoList = todoList.Where(s => s.Status == status.Value);
-            return todoList.Take(limit.Value).Skip(limit.Value * offset.Value).OrderByDescending(s=>s.Id).ToList();
+            if(status.HasValue) 
+                todoList = todoList.Where(s => s.Status == status.Value);
+
+            return todoList.Take(limit).Skip(limit * (offset - 1)).OrderByDescending(s=>s.Id).ToList();
         }
     }
 }

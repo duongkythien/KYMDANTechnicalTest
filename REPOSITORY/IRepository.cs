@@ -12,9 +12,9 @@ namespace REPOSITORY
 
         T Insert(T ts);
 
-        int Update(T t);
+        T Update(T t);
 
-        void Delete(long id);
+        int Delete(long id);
 
         IQueryable<T> GetAll();
     }

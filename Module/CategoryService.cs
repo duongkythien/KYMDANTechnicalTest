@@ -30,9 +30,28 @@ namespace MODULE
             return _categoryRepo.GetAll().FirstOrDefault(s => s.Name == name);
         }
 
-        public Category Insert(Category category)
+        public Category Insert(string categoryName)
         {
-            return _categoryRepo.Insert(category);
+            Category newItem = new Category
+            {
+                Name = categoryName
+            };
+            return _categoryRepo.Insert(newItem);
+        }
+
+        public int Delete(long id)
+        {
+            return _categoryRepo.Delete(id);
+        }
+
+        public Category Update(long id, string categoryName)
+        {
+            Category newItem = new Category
+            {
+                Id = id,
+                Name = categoryName
+            };
+            return _categoryRepo.Update(newItem);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using DATA;
+using DATA.EF;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ namespace REPOSITORY
 {
     public class Repository<T> : IRepository<T> where T : BaseEntity
     {
-        public Repository(DbContext dbContext)
+        public Repository(Context dbContext)
         {
             _dbContext = dbContext;
             entities = dbContext.Set<T>();
@@ -30,17 +31,18 @@ namespace REPOSITORY
             return ts;
         }
 
-        public int Update(T t)
+        public T Update(T t)
         {
             if(t == null)
             {
                 throw new ArgumentNullException(nameof(t));
             }
             entities.Update(t);
-            return _dbContext.SaveChanges();
+            _dbContext.SaveChanges();
+            return t;
         }
 
-        public void Delete(long id)
+        public int Delete(long id)
         {
             if(id == 0)
                 throw new ArgumentOutOfRangeException(nameof(id));
@@ -48,6 +50,7 @@ namespace REPOSITORY
             if(foundItem == null)
                 throw new KeyNotFoundException(nameof(id));
             entities.Remove(foundItem);
+            return _dbContext.SaveChanges();
         }
 
         public IQueryable<T> GetAll() => entities;
